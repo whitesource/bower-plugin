@@ -1,0 +1,27 @@
+{
+  "name": "N.js",
+  "version": "0.0.0",
+  "homepage": "https://github.com/doronzzz/N.js",
+  "authors": [
+    "doronzzz <gourdoron@gmail.com>"
+  ],
+  "dependencies": {
+    "requirejs": "~2.1.16",
+    "requirejs-text": "~2.0.13",
+    "backbone": "*",
+    "jquery": "*",
+    "underscore": "~1.7.0",
+    "json2": "*",
+    "almond": "~0.3.0",
+    "prism": "https://github.com/PrismJS/prism.git#gh-pages"
+  },
+  "description": "Nurego js",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
