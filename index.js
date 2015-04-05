@@ -1,12 +1,34 @@
+var http = require('http');
+var https = require('https');
 var fs = require('fs');
 var cli = require('cli');
-var postJSON = {
-	dependencies:{}
-};
-
+var querystring = require('querystring');
+var baseURL = 'saas.whitesourcesoftware.com';
 var bowerDeps = {};
-	
-var buildReport = function(){
+var postJSON = {dependencies:[]};
+var checkPolSent = false;
+
+var readConfJson = function(){
+	try{
+		var noConfMsg = 'Please create a whitesource.config.json to continue';
+		var fileMsg = 'whitesource.config.json is not a valid JSON file';
+		confJson = fs.readFileSync('./whitesource.config.json', 'utf8',
+		function(err,data){
+			if(!err){
+				cli.error(fileMsg);
+				return false;
+			}
+		});	
+		return JSON.parse(confJson);
+	}catch(e){
+		cli.error(noConfMsg);
+		return false;
+	}
+}
+
+
+var buildReport = function(confJson){
+	var depsArray = [];
 	try{
 		bowerFile = JSON.parse(fs.readFileSync('./bower.json', 'utf8'));
 	}catch(e){
@@ -14,7 +36,7 @@ var buildReport = function(){
 		return false;
 	}
 
-	try {
+	try{
 		postJSON.name = bowerFile.name;
 		postJSON.version = bowerFile.version;
 	}catch(e){
@@ -24,42 +46,41 @@ var buildReport = function(){
 
 	bowerDeps = bowerFile.dependencies;
 
-	Object.keys(bowerDeps).forEach(function(key) {
-		postJSON.dependencies[key] = bowerDeps[key];
+	Object.keys(bowerDeps).forEach(function(key){
+		var item = {};
+		item[key] = bowerDeps[key];
+		depsArray.push(item);
 	});
 
-	console.log(postJSON)
+	postJSON.dependencies = depsArray;
+
+	return postJSON;
 }
 
-buildReport();
-
-
-var postJson = function(){
+var postJson = function(report,confJson){
 	cli.ok('Getting ready to post report to WhiteSource...');
-	var origJson = JSON.parse(fs.readFileSync('./whitesource.report.json', 'utf8'));
-
 	var isHttps = true;
-	
+
 	if(typeof(confJson.https) !== "undefined"){
 		 isHttps = confJson.https;
 	}
 	
 	var reqHost = (confJson.baseURL) ? confJson.baseURL : baseURL;
 	var port = (confJson.port) ? confJson.port : "443";
-	var productName = (confJson.productName) ? confJson.productName : modJson.name;
-	var productVer = (confJson.productVersion) ? confJson.productVersion : modJson.version;
+	var productName = (confJson.productName) ? confJson.productName : report.name;
+	var productVer = (confJson.productVersion) ? confJson.productVersion : report.version;
 	var productToken = (confJson.productToken) ? confJson.productToken : "";
-	var projectName = (confJson.projectName) ? confJson.projectName : modJson.name;
-	var projectVer = (confJson.projectVer) ? confJson.projectVer : modJson.version;
+	var projectName = (confJson.projectName) ? confJson.projectName : report.name;
+	var projectVer = (confJson.projectVer) ? confJson.projectVer : report.version;
 	var projectToken = (confJson.projectToken) ? confJson.projectToken : "";
 	var ts = new Date().valueOf();
 	var post_req;
 
 	if(!confJson.apiKey){
+		//console.log(confJson.apiKey)
 		cli.error('Cant find API Key, please make sure you input your whitesource API token in the whitesource.config file.');
 		return false
 	}
-
 	
 	if(projectToken && productToken){
 		cli.error('Cant use both project Token & product Token please select use only one token,to fix this open the whitesource.config file and remove one of the tokens.');
@@ -67,17 +88,28 @@ var postJson = function(){
 	}
 
 	var json = [{
-		dependencies:modifiedJson.children,
+		dependencies:report.dependencies,
+		name:report.name,
+		version:report.version,
 		coordinates:{
-        	"artifactId": modJson.name,
-	        "version":modJson.version
+        	"artifactId": report.name,
+	        "version":report.version
     	}
 	}]
+
+console.log(json)
+	fs.writeFile("whitesource.report.json", JSON.stringify(json, null, 4), function(err) {
+	    if(err){
+	      cli.error(err);
+	    } else {
+	      
+	    }
+	}); 
 	
-	var checkPol = (modJson.checkPolicies) ? modJson.checkPolicies : true;
+	var checkPol = (confJson.checkPolicies) ? confJson.checkPolicies : true;
 	var myReqType = ((checkPol && !checkPolSent) ? 'CHECK_POLICIES' : 'UPDATE');
 
-	if(!checkPolEnabled){
+	if(!confJson.checkPolEnabled){
 		myReqType = 'UPDATE';
 	}
 
@@ -93,7 +125,7 @@ var postJson = function(){
 		  'timeStamp':ts,
 		  'diff':JSON.stringify(json)
 	  }
-
+	  console.log(myPost);
 	  //if both Project-Token and ProductToken send the Project-Token
 	  if(projectToken){
 		myPost.projectToken = projectToken;
@@ -103,6 +135,7 @@ var postJson = function(){
 
 	  // Build the post string from an object
 	  var post_data = querystring.stringify(myPost);
+	  
 
 	  cli.ok("Posting to " + reqHost + ":" + port)
 
@@ -127,6 +160,7 @@ var postJson = function(){
 		  });
 
 		  res.on('end', function(){
+		  	//console.log(str)
 		  	var resJson = JSON.parse(str);
   	        if(resJson.status == 1){
 	      	  buildCallback(resJson);
@@ -154,4 +188,13 @@ var postJson = function(){
 	  post_req.write(post_data);
 	  post_req.end();
 }
+
+
+var start = function(){
+	var confJSON = readConfJson();
+	var report = buildReport(confJSON);
+	postJson(report,confJSON);
+}
+
+start();
 

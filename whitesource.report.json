@@ -1,0 +1,33 @@
+[
+    {
+        "dependencies": [
+            {
+                "requirejs": "2.1.16"
+            },
+            {
+                "requirejs-text": "2.0.13"
+            },
+            {
+                "backbone": "1"
+            },
+            {
+                "jquery": "1"
+            },
+            {
+                "underscore": "1.7.0"
+            },
+            {
+                "json2": "1"
+            },
+            {
+                "almond": "0.3.0"
+            }
+        ],
+        "name": "N.js",
+        "version": "0.0.1",
+        "coordinates": {
+            "artifactId": "N.js",
+            "version": "0.0.1"
+        }
+    }
+]
