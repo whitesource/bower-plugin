@@ -7,6 +7,21 @@ var baseURL = 'saas.whitesourcesoftware.com';
 var bowerDeps = {};
 var postJSON = {dependencies:[]};
 var checkPolSent = false;
+var runtime = new Date().valueOf();
+
+var buildCallback = function(resJson){
+	var timer = new Date().valueOf() - runtime;
+	timer = timer / 1000;
+	
+
+	var finish = function(){
+		cli.ok('Build success!' + " ( took: " + timer +"s ) " );
+		process.exit(0);
+	}
+
+	finish();
+}
+
 
 var readConfJson = function(){
 	try{
@@ -48,9 +63,22 @@ var buildReport = function(confJson){
 
 	Object.keys(bowerDeps).forEach(function(key){
 		var item = {};
-		item[key] = bowerDeps[key];
+		item['name'] = key;
+		item['version'] = bowerDeps[key];
+		item['groupId'] = key;
+		item['systemPath'] = null;
+		item['scope'] = null;
+		item['exclusions'] = [];
+		item['children'] = [];
+		item['classifier'] = null;
 		depsArray.push(item);
 	});
+
+        		/*value[i].groupId = i;
+        		value[i].systemPath = null;
+        		value[i].scope = null;;
+        		value[i].exclusions = [];
+				value[i].classifier = null;*/
 
 	postJSON.dependencies = depsArray;
 
@@ -97,7 +125,6 @@ var postJson = function(report,confJson){
     	}
 	}]
 
-console.log(json)
 	fs.writeFile("whitesource.report.json", JSON.stringify(json, null, 4), function(err) {
 	    if(err){
 	      cli.error(err);
@@ -115,7 +142,7 @@ console.log(json)
 
 	var myPost = {
 		  'type' : myReqType,
-		  'agent':'npm-plugin',
+		  'agent':'bower-plugin',
 		  'agentVersion':'1.0',
 		  'product':productName,
 		  'productVer':productVer,
@@ -125,7 +152,6 @@ console.log(json)
 		  'timeStamp':ts,
 		  'diff':JSON.stringify(json)
 	  }
-	  console.log(myPost);
 	  //if both Project-Token and ProductToken send the Project-Token
 	  if(projectToken){
 		myPost.projectToken = projectToken;
