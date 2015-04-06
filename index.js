@@ -42,6 +42,48 @@ var readConfJson = function(){
 }
 
 
+var getBowerCompsDir = function(){
+	try{
+		var origJson = JSON.parse(fs.readFileSync('./.bowerrc', 'utf8'));
+		if(origJson.directory){
+			return origJson.directory; //custom user setting directory.
+		}
+	}catch(e){
+		//cli.error('Problem reading bowerrc.json, please check the file is a valid JSON');
+			return "bower_components"; //default directory;
+	}
+}
+
+var getVersion = function(plugin){
+	try{
+		//console.log(plugin);
+		//console.log('./'+getBowerCompsDir()+'/' + plugin + "/bower.json");
+		var origJson = JSON.parse(fs.readFileSync('./'+getBowerCompsDir()+'/' + plugin + "/bower.json", 'utf8'));
+		//console.log(origJson);
+		if(origJson.version){
+			return origJson.version;
+		}
+		if(origJson._release){
+			return origJson._release;
+		}
+	}catch(e){
+		try{
+			var origJson = JSON.parse(fs.readFileSync('./'+getBowerCompsDir()+'/' + plugin + "/.bower.json", 'utf8'));
+			//console.log(origJson);
+			if(origJson.version){
+				return origJson.version;
+			}
+			if(origJson._release){
+				return origJson._release;
+			}
+		}catch(e){
+			cli.error('Problem reading bower.json, for ' +plugin+ ' please check the file is a valid JSON');
+		}
+		cli.error('Problem reading bower.json, for ' +plugin+ ' please check the file is a valid JSON');
+		return false;
+	}
+}
+
 var buildReport = function(confJson){
 	var depsArray = [];
 	try{
@@ -64,7 +106,7 @@ var buildReport = function(confJson){
 	Object.keys(bowerDeps).forEach(function(key){
 		var item = {};
 		item['name'] = key;
-		item['version'] = bowerDeps[key];
+		item['version'] = getVersion(key);
 		item['groupId'] = key;
 		item['systemPath'] = null;
 		item['scope'] = null;
@@ -81,7 +123,7 @@ var buildReport = function(confJson){
 				value[i].classifier = null;*/
 
 	postJSON.dependencies = depsArray;
-
+	//console.log(postJSON.dependencies)
 	return postJSON;
 }
 
