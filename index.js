@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 var http = require('http');
 var https = require('https');
 var fs = require('fs');
@@ -10,6 +12,7 @@ var checkPolSent = false;
 var runtime = new Date().valueOf();
 
 var buildCallback = function(resJson){
+	console.log(resJson)
 	var timer = new Date().valueOf() - runtime;
 	timer = timer / 1000;
 	
@@ -106,6 +109,7 @@ var buildReport = function(confJson){
 	Object.keys(bowerDeps).forEach(function(key){
 		var item = {};
 		item['name'] = key;
+		item['artifactId'] = key;
 		item['version'] = getVersion(key);
 		item['groupId'] = key;
 		item['systemPath'] = null;
@@ -245,6 +249,7 @@ var postJson = function(report,confJson){
 
       if(isHttps){
       	  cli.info("Using HTTPS")
+      	  //console.log(post_data)
       	  post_options.headers = {
 	          'Content-Type': 'application/x-www-form-urlencoded',
 	          'Content-Length': post_data.length
@@ -253,6 +258,7 @@ var postJson = function(report,confJson){
       }
 
 	  // post the data
+	  //console.log(post_data)
 	  post_req.write(post_data);
 	  post_req.end();
 }
@@ -261,6 +267,7 @@ var postJson = function(report,confJson){
 var start = function(){
 	var confJSON = readConfJson();
 	var report = buildReport(confJSON);
+	//console.log(report)
 	postJson(report,confJSON);
 }
 
