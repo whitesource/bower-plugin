@@ -1,32 +1,33 @@
 {
   "name": "whitesource-bower",
-  "version": "0.0.21",
+  "version": "0.0.22",
   "description": "WhiteSource Bower Plugin",
   "preferGlobal": true,
-  "main": "./bin/index.js",
   "bin": {
-    "whitesource-bower": "./bin/index.js"
+    "whitesource": "./bin/whitesource-bower.js"
   },
   "homepage": "https://github.com/whitesource/bower-plugin.git",
   "repository": {
     "type": "git",
     "url": "https://github.com/whitesource/bower-plugin.git"
   },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords":[
+  "engines" : { "node" : ">=5.0" },
+  "main": "./bin/whitesource-bower.js",
+  "keywords": [
     "whitesource",
+    "npm",
     "bower"
   ],
-  "dependencies": {
-    "whitesource": "*"
-  },
   "author": "Doron Gour",
   "licenses": [
     {
       "type": "Apache-2.0",
       "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
     }
-  ]
+  ],
+  "devDependencies": {
+  },
+  "dependencies": {
+    "whitesource": "*"
+  }
 }
