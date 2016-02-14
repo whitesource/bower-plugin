@@ -1,6 +1,6 @@
 {
   "name": "whitesource-bower",
-  "version": "0.0.12",
+  "version": "0.0.20",
   "description": "WhiteSource Bower Plugin",
   "preferGlobal": true,
   "main": "./bin/index.js",
@@ -20,9 +20,7 @@
     "bower"
   ],
   "dependencies": {
-    "cli": "^0.6.4",
-    "prompt": "^0.2.14",
-    "shelljs": "^0.3.0"
+    "whitesource": "*"
   },
   "author": "Doron Gour",
   "licenses": [
