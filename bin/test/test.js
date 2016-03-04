@@ -121,6 +121,10 @@ exe.stderr.on('data', function (data) {
 });
 
 exe.on('exit', function (code) {
+  if(code){
+    console.log("Error Running Bower Install: " + code);
+    return;
+  }
   console.log('child process exited with code ' + code);
 	fs.writeFile('./.ws_bower/ws_log_bower.json', buffer, function (err) {
 	  if (err) return console.log(err);
