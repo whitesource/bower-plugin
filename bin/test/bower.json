@@ -1,0 +1,14 @@
+{
+  "name": "test-project",
+  "version": "1.4.3",
+  "main": "",
+  "ignore": [],
+  "dependencies":{
+  	"d3" : "*",
+	"underscore" : "*",
+	"bootstrap":"*",
+	"angular":"*",
+	"video.js":"*",
+	"jquery.countdown":"*"
+  }
+}

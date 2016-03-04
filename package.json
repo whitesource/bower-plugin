@@ -11,7 +11,9 @@
     "type": "git",
     "url": "https://github.com/whitesource/bower-plugin.git"
   },
-  "engines" : { "node" : ">=5.0" },
+  "engines": {
+    "node": ">=5.0"
+  },
   "main": "./bin/ws-bower.js",
   "keywords": [
     "whitesource",
@@ -25,9 +27,10 @@
       "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
     }
   ],
-  "devDependencies": {
-  },
+  "devDependencies": {},
   "dependencies": {
+    "checksum": "^0.1.1",
+    "download": "^4.4.3",
     "whitesource": "*"
   }
 }
