@@ -4,6 +4,7 @@ var http = require('https');
 var util  = require('util');
 var Download = require('download');
 var checksum = require("checksum");
+var spawnSync = require('child_process').spawnSync;
 
 console.log( "WS Bower : Initializing Agent");
 
@@ -41,7 +42,7 @@ var downloadPckgs = function(){
         // console.log(files)
 
         console.log( "WS Bower : Running CheckSum... ");
-        var depWithCheckSum = [{"dependencies": []}];
+        var depWithCheckSum = [];
 
         var callback = function (err, sum) {
             var sumClc = (typeof (sum) != "undefined") ? sum : "0";
@@ -63,7 +64,7 @@ var downloadPckgs = function(){
 
             //console.log(dep);
 
-            depWithCheckSum[0]["dependencies"].push(dep)
+            depWithCheckSum.push(dep)
            
             bowerJson[this.index]["_ws"] = true;
             
@@ -97,11 +98,6 @@ var downloadPckgs = function(){
 
     });
 };
-
-
-//spawn = require('child_process').spawn,
-var spawnSync = require('child_process').spawnSync;
-
 
 
 console.log( "WS Bower : Strarting Report...");

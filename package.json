@@ -1,6 +1,6 @@
 {
   "name": "ws-bower",
-  "version": "0.0.25",
+  "version": "0.0.26",
   "description": "WhiteSource Bower Plugin",
   "preferGlobal": true,
   "bin": {
@@ -29,8 +29,6 @@
   ],
   "devDependencies": {},
   "dependencies": {
-    "checksum": "^0.1.1",
-    "download": "^4.4.3",
     "whitesource": "*"
   }
 }
