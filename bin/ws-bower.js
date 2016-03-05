@@ -2,7 +2,6 @@
 
 'use strict';
 
-var exec = require('child_process').exec;
 var fs = require('fs');
 var http = require('https');
 var util  = require('util');
@@ -14,7 +13,7 @@ console.log( "WS Bower : Initializing Agent");
 
 var parseBowerJson = function(json){
     var newJson = [];
-    for (i in json){
+    for (var i in json){
         if(json[i].id == "download"){
             newJson.push(json[i])
         }
@@ -25,21 +24,21 @@ var parseBowerJson = function(json){
 var downloadPckgs = function(){
     //need to handle read exception 
     console.log( "WS Bower : Locating Bower Pacakges Source...");
-	var bowerJson = parseBowerJson(    JSON.parse(fs.readFileSync("./.ws_bower/ws_bower.json", 'utf8'))    );
+    var bowerJson = parseBowerJson(    JSON.parse(fs.readFileSync("./ws_bower.json", 'utf8'))    );
 
     var downloadsObj = new Download({mode: '755'})
-	for (i in bowerJson){
-			var url = bowerJson[i].message;
+    for (var i in bowerJson){
+            var url = bowerJson[i].message;
             var fileType = url.split("/");
             var depName = bowerJson[i].data.resolver.name;
 
             fileType = fileType[fileType.length - 1];
             
             console.log(depName + "  :  "+ url);
-			
+            
             downloadsObj.get(url,'./.ws_bower/archive/' + depName);
             //download(url, "./.ws_bower/archive" + fileName + fileType);
-	}
+    }
 
     downloadsObj.run(function(err,files){
         // console.log(err)
@@ -86,11 +85,20 @@ var downloadPckgs = function(){
             if(checkComplete()){
                 console.log( "WS Bower : Finishing Report");
                 fs.writeFileSync("./.ws_bower/.ws-sha1-report.json", JSON.stringify(depWithCheckSum, null, 4),{});
+
+                var exec = require('child_process').exec;
+                var child = exec('whitesource bower',
+                  function(error, stdout, stderr){
+                    console.log(  stderr );
+                    if (error !== null) {
+                      console.log("exec error: " + error);
+                    }
+                });
             }
         }
 
 
-        for (i in bowerJson){
+        for (var i in bowerJson){
                 var url = bowerJson[i].message;
                 var tarZip = url.split("/");
                 var depName = bowerJson[i].data.resolver.name;
@@ -106,22 +114,21 @@ var downloadPckgs = function(){
 
 console.log( "WS Bower : Strarting Report...");
 //make temp folder for installing plugins
-exe    = spawnSync('mkdir',['.ws_bower']);
-exe    = spawnSync('mkdir',['archive'],{cwd: './.ws_bower'});
+var exe    = spawnSync('mkdir',['.ws_bower']);
+var exe    = spawnSync('mkdir',['archive'],{cwd: './.ws_bower'});
 
 console.log( "WS Bower : Locating Original Bower.json...");
 //copy original bower.json to install from
-exe    = spawnSync('cp',['./bower.json','./.ws_bower/']);
+var exe    = spawnSync('cp',['./bower.json','./.ws_bower/']);
 
 
 //run bower install and save json (--force to avoid cache) cmd to run in ws folder.
 console.log( "WS Bower : Installing and Scanning Dependencies...");
-exe    = spawnSync('bower',['install','--json', '--force'],{cwd: './.ws_bower'});
+var exe    = spawnSync('bower',['install','--json', '--force'],{cwd: './.ws_bower'});
 
-fs.writeFile('./.ws_bower/ws_bower.json', exe.stderr, function (err) {
+fs.writeFile('./ws_bower.json', exe.stderr, function (err) {
   if (err) return console.log(err);
   console.log("WS Bower: Downloading Packages...");
   downloadPckgs();
 });
 
-exe    = spawnSync('whitesource',['bower']);
