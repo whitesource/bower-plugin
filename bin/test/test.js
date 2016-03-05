@@ -5,6 +5,8 @@ var util  = require('util');
 var Download = require('download');
 var checksum = require("checksum");
 
+console.log( "WS Bower : Initializing Agent");
+
 var parseBowerJson = function(json){
     var newJson = [];
     for (i in json){
@@ -17,7 +19,8 @@ var parseBowerJson = function(json){
 
 var downloadPckgs = function(){
     //need to handle read exception 
-	var bowerJson = parseBowerJson(    JSON.parse(fs.readFileSync("./.ws_bower/test.json", 'utf8'))    );
+    console.log( "WS Bower : Locating Bower Pacakges Source...");
+	var bowerJson = parseBowerJson(    JSON.parse(fs.readFileSync("./.ws_bower/ws_bower.json", 'utf8'))    );
 
     var downloadsObj = new Download({mode: '755'})
 	for (i in bowerJson){
@@ -27,9 +30,7 @@ var downloadPckgs = function(){
 
             fileType = fileType[fileType.length - 1];
             
-            console.log(url)
-            console.log(depName)
-            console.log(fileType)
+            console.log(depName + "  :  "+ url);
 			
             downloadsObj.get(url,'./.ws_bower/archive/' + depName);
             //download(url, "./.ws_bower/archive" + fileName + fileType);
@@ -39,7 +40,7 @@ var downloadPckgs = function(){
         // console.log(err)
         // console.log(files)
 
-        console.log("done")
+        console.log( "WS Bower : Running CheckSum... ");
         var depWithCheckSum = [{"dependencies": []}];
 
         var callback = function (err, sum) {
@@ -78,7 +79,7 @@ var downloadPckgs = function(){
             }
 
             if(checkComplete()){
-                console.log( JSON.stringify(depWithCheckSum) )
+                console.log( "WS Bower : Finishing Report");
                 fs.writeFileSync("./.ws_bower/.ws-sha1-report.json", JSON.stringify(depWithCheckSum, null, 4),{});
             }
         }
@@ -98,40 +99,27 @@ var downloadPckgs = function(){
 };
 
 
-spawn = require('child_process').spawn,
-    //exe    = spawn('bower',['install','jquery','--json']);
+//spawn = require('child_process').spawn,
+var spawnSync = require('child_process').spawnSync;
 
+
+
+console.log( "WS Bower : Strarting Report...");
 //make temp folder for installing plugins
-exe    = spawn('mkdir',['.ws_bower']);
-exe    = spawn('mkdir',['archive'],{cwd: './.ws_bower'});
+exe    = spawnSync('mkdir',['.ws_bower']);
+exe    = spawnSync('mkdir',['archive'],{cwd: './.ws_bower'});
 
-
+console.log( "WS Bower : Locating Original Bower.json...");
 //copy original bower.json to install from
-exe    = spawn('cp',['./bower.json','./.ws_bower/']);
+exe    = spawnSync('cp',['./bower.json','./.ws_bower/']);
+
 
 //run bower install and save json (--force to avoid cache) cmd to run in ws folder.
-exe    = spawn('bower',['install','--json', '--force'],{cwd: './.ws_bower'});
+console.log( "WS Bower : Installing and Scanning Dependencies...");
+exe    = spawnSync('bower',['install','--json', '--force'],{cwd: './.ws_bower'});
 
-var buffer = [];
-exe.stderr.on('data', function (data) {
-	// fs.writeFile('./.ws_bower/test.json.' + new Date() , buffer, function (err) {
-	//   if (err) return console.log(err);
-	// });
-  buffer += data;
+fs.writeFile('./.ws_bower/ws_bower.json', exe.stderr, function (err) {
+  if (err) return console.log(err);
+  console.log("WS Bower: Downloading Packages...");
+  downloadPckgs();
 });
-
-exe.on('exit', function (code) {
-  if(code){
-    console.log("Error Running Bower Install: " + code);
-    return;
-  }
-  console.log('child process exited with code ' + code);
-	fs.writeFile('./.ws_bower/ws_log_bower.json', buffer, function (err) {
-	  if (err) return console.log(err);
-	  downloadPckgs();
-	});
-});
-
-
-
-
