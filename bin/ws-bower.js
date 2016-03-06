@@ -56,7 +56,7 @@ var downloadPckgs = function(){
 
         var callback = function (err, sum) {
             var sumClc = (typeof (sum) != "undefined") ? sum : "0";
-            sumClc = sumClc.toUpperCase();
+            sumClc = sumClc.toLowerCase();
             console.log( "  sum: " + sumClc + "  name:" + this.name);
 
             var dep = {
