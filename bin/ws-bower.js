@@ -9,6 +9,7 @@ var Download = require('download');
 var checksum = require("checksum");
 var shelljs = require("shelljs");
 var spawnSync = require('child_process').spawnSync;
+var child_process = require('child_process');
 
 console.log( "WS Bower : Initializing Agent");
 
@@ -25,7 +26,12 @@ var parseBowerJson = function(json){
 var downloadPckgs = function(){
     //need to handle read exception 
     console.log( "WS Bower : Locating Bower Pacakges Source...");
-    var bowerJson = parseBowerJson(    JSON.parse(fs.readFileSync("./ws_bower.json", 'utf8'))    );
+    var file = fs.readFileSync("./ws_bower.json", 'utf8');
+    file = file.replace(/(\r\n|\n|\r)/gm,"");
+    if(file.indexOf("]{") != -1){//fix for json output
+        file = file.substr(0,file.indexOf("]{") + 1)
+    }
+    var bowerJson = parseBowerJson(    JSON.parse(file)    );
 
     var downloadsObj = new Download({mode: '755'})
     for (var i in bowerJson){
@@ -132,11 +138,22 @@ shelljs.cp('-R', './bower.json', './.ws_bower/');
 
 //run bower install and save json (--force to avoid cache) cmd to run in ws folder.
 console.log( "WS Bower : Installing and Scanning Dependencies...");
-var exe    = spawnSync('bower',['install','--json', '--force'],{cwd: './.ws_bower'});
 
-fs.writeFile('./ws_bower.json', exe.stderr, function (err) {
-  if (err) return console.log(err);
-  console.log("WS Bower: Downloading Packages...");
-  downloadPckgs();
-});
+// var exe = child_process.execSync('bower install --json --force',{cwd: './.ws_bower',encoding: 'utf8'});
+// console.log(" \n---- exe ---- \n");
+// console.log(exe);
+// fs.writeFile('./ws_bower.json', exe, function (err) {
+//   if (err) return console.log(err);
+//   console.log("WS Bower: Downloading Packages...");
+//   downloadPckgs();
+// });
 
+var callback = function(code, stdout, stderr) {
+    fs.writeFile('./ws_bower.json', stderr, function (err) {
+      if (err) return console.log(err);
+      console.log("WS Bower: Downloading Packages...");
+      downloadPckgs();
+    });
+}
+var child = shelljs.exec("bower install --json --force");
+callback(0,null,child.output)
