@@ -7,6 +7,7 @@ var http = require('https');
 var util  = require('util');
 var Download = require('download');
 var checksum = require("checksum");
+var shelljs = require("shelljs");
 var spawnSync = require('child_process').spawnSync;
 
 console.log( "WS Bower : Initializing Agent");
@@ -113,13 +114,20 @@ var downloadPckgs = function(){
 
 
 console.log( "WS Bower : Strarting Report...");
+
+
 //make temp folder for installing plugins
-var exe    = spawnSync('mkdir',['.ws_bower']);
-var exe    = spawnSync('mkdir',['archive'],{cwd: './.ws_bower'});
+//var exe    = spawnSync('mkdir',['.ws_bower']);
+//var exe    = spawnSync('mkdir',['archive'],{cwd: './.ws_bower'});
+
+shelljs.rm('-rf', './.ws_bower');
+shelljs.mkdir('-p' , '.ws_bower');
+shelljs.mkdir('-p' , './.ws_bower/archive');
 
 console.log( "WS Bower : Locating Original Bower.json...");
 //copy original bower.json to install from
-var exe    = spawnSync('cp',['./bower.json','./.ws_bower/']);
+//var exe    = spawnSync('cp',['./bower.json','./.ws_bower/']);
+shelljs.cp('-R', './bower.json', './.ws_bower/');
 
 
 //run bower install and save json (--force to avoid cache) cmd to run in ws folder.
