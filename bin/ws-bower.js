@@ -28,9 +28,17 @@ var downloadPckgs = function(){
     console.log( "WS Bower : Locating Bower Pacakges Source...");
     var file = fs.readFileSync("./ws_bower.json", 'utf8');
     file = file.replace(/(\r\n|\n|\r)/gm,"");
-    if(file.indexOf("]{") != -1){//fix for json output
-        file = file.substr(0,file.indexOf("]{") + 1)
+
+    var fixJson = function(file){
+        if(file.indexOf("]{") != -1){//fix for json output
+            file = file.substr(0,file.indexOf("]{") + 1)
+            return fixJson(file);
+        }
+        return file;
     }
+
+    var file = fixJson(file);
+
     var bowerJson = parseBowerJson(    JSON.parse(file)    );
 
     var downloadsObj = new Download({mode: '755'})
