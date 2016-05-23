@@ -1,6 +1,6 @@
 {
   "name": "ws-bower",
-  "version": "0.0.56",
+  "version": "0.0.57",
   "description": "WhiteSource Bower Plugin",
   "preferGlobal": true,
   "bin": {

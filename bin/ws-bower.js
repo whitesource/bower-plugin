@@ -94,6 +94,9 @@ var downloadPckgs = function(){
                 console.log(depName + "  :  "+ url);
                 
                 downloadsObj.get(url,'./.ws_bower/archive/' + depName);
+            }else{
+                //mark as completed if not downloading (example: private repo)
+                bowerJson[i]["_ws"] = true;
             }
             //download(url, "./.ws_bower/archive" + fileName + fileType);
     }
