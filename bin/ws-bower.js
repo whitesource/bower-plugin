@@ -16,7 +16,7 @@ console.log( "WS Bower : Initializing Agent");
 var parseBowerJson = function(json){
     var newJson = [];
     for (var i in json){
-        if(json[i].id == "download"){
+        if(json[i].id == "checkout"){
             newJson.push(json[i])
         }
     }
@@ -30,28 +30,71 @@ var downloadPckgs = function(){
     file = file.replace(/(\r\n|\n|\r)/gm,"");
 
     var fixJson = function(file){
+        //go to deps array avoid console log prints at first line.
+        file = file.substr(file.indexOf('['),file.length);
+        
         if(file.indexOf("]{") != -1){//fix for json output
             file = file.substr(0,file.indexOf("]{") + 1)
-            return fixJson(file);
+            //return fixJson(file);
         }
         return file;
     }
-
+    
     var file = fixJson(file);
 
     var bowerJson = parseBowerJson(    JSON.parse(file)    );
 
     var downloadsObj = new Download({mode: '755'})
     for (var i in bowerJson){
-            var url = bowerJson[i].message;
-            var fileType = url.split("/");
-            var depName = bowerJson[i].data.resolver.name;
+            //url example - https://codeload.github.com/{reposOwner}/{repoName}/tar.gz/{tagName}
+            /* remove tar.zip after checksum (yossi).
+                
+            {
+              "level": "action",
+              "id": "checkout",
+              "message": "2.0.5",
+              "data": {
+                "resolution": {
+                  "type": "version",
+                  "tag": "2.0.5",
+                  "commit": "317bbbfb6ba5367a27146ceffafe31687208bea6"
+                },
+                "to": "C:\\Users\\mark_\\AppData\\Local\\Temp\\DERBECKER-SQ-1-mark_\\bower\\42ef867131df1c492c5871714f7f094c-24840-rX5Iha",
+                "endpoint": {
+                  "name": "angular-editable-text",
+                  "source": "https://github.com/seeq12/angular-editable-text.git",
+                  "target": "2.0.5"
+                },   //url example - https://codeload.github.com/{reposOwner}/{repoName}/tar.gz/{tagName}
+                     //https://codeload.github.com/seeq12/angular-editable-text/tar.gz/2.0.5
+                     //https://codeload.github.com/seeq12/angular-editable-text/tar.gz/2.0.5
+                "resolver": {
+                  "name": "angular-editable-text",
+                  "source": "https://github.com/seeq12/angular-editable-text.git",
+                  "target": "2.0.5"
+                }
+              }
+            }
 
-            fileType = fileType[fileType.length - 1];
+            */
+
+
             
-            console.log(depName + "  :  "+ url);
-            
-            downloadsObj.get(url,'./.ws_bower/archive/' + depName);
+            var canTrackPkg = (bowerJson[i].data && bowerJson[i].data.resolver && bowerJson[i].data.resolver.source.indexOf('github'));
+            if(canTrackPkg){
+                var tag = bowerJson[i].message;
+                var resolvedUrl = bowerJson[i].data.resolver.source;
+                var url = resolvedUrl.replace('https://github.com','https://codeload.github.com');
+                url = url.substr(0,url.lastIndexOf('.git'));
+                url = url+'/tar.gz/' + tag;
+                var fileType = url.split("/");
+                var depName = bowerJson[i].data.resolver.name;
+
+                fileType = fileType[fileType.length - 1];
+                
+                console.log(depName + "  :  "+ url);
+                
+                downloadsObj.get(url,'./.ws_bower/archive/' + depName);
+            }
             //download(url, "./.ws_bower/archive" + fileName + fileType);
     }
 
