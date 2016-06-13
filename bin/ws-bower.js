@@ -13,6 +13,10 @@ var child_process = require('child_process');
 
 console.log( "WS Bower : Initializing Agent");
 
+var noConfMsg = 'Please create a whitesource.config.json to continue';
+var fileMsg = 'whitesource.config.json is not a valid JSON file';
+
+
 var parseBowerJson = function(json){
     var newJson = [];
     for (var i in json){
