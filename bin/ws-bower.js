@@ -209,5 +209,32 @@ var callback = function(code, stdout, stderr) {
       downloadPckgs();
     });
 }
-var child = shelljs.exec("bower install --json --force");
+
+
+var initConf = function(){
+     try{
+        res = fs.readFileSync('./whitesource.config.json', 'utf8',function(err,data){
+            if(!err){
+                cli.error(fileMsg);
+                return false;
+            }
+        }); 
+        res = JSON.parse(res);
+    }catch(e){
+        cli.error(noConfMsg);
+        return false;
+    }
+
+    return res;
+}
+
+var confJson = initConf();
+var child = null;
+
+if(typeof (confJson.devDep) !== "undefined" && (confJson.devDep == "true" || confJson.devDep) ){
+    child = shelljs.exec("bower install --json --force --production");
+}else{
+    child = shelljs.exec("bower install --json --force");
+}
+
 callback(0,null,child.output)
