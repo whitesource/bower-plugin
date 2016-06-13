@@ -216,6 +216,7 @@ var callback = function(code, stdout, stderr) {
 
 
 var initConf = function(){
+    var res = null;
      try{
         res = fs.readFileSync('./whitesource.config.json', 'utf8',function(err,data){
             if(!err){
