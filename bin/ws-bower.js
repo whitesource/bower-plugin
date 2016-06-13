@@ -215,13 +215,13 @@ var initConf = function(){
      try{
         res = fs.readFileSync('./whitesource.config.json', 'utf8',function(err,data){
             if(!err){
-                cli.error(fileMsg);
+                console.log(fileMsg);
                 return false;
             }
         }); 
         res = JSON.parse(res);
     }catch(e){
-        cli.error(noConfMsg);
+        console.log(noConfMsg);
         return false;
     }
 
