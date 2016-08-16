@@ -1,7 +1,11 @@
 node_modules
 bower_components
 whitesource.config.json
-whitesource.report.json
-_whitesource.config.json
-_whitesource.report.json
-_bower.json
+ws_bower.json
+.idea/
+.ws_bower/
+bin/.ws_bower/
+bin/*.json
+bin/ws-log-bower-deps-report
+bin/ws-log-bower-report
+bower.json
