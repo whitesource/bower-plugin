@@ -1,6 +1,6 @@
 {
   "name": "ws-bower",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "WhiteSource Bower Plugin",
   "preferGlobal": true,
   "bin": {
@@ -21,10 +21,12 @@
     "bower"
   ],
   "author": "Doron Gour",
-  "contributors": [{
-    "name": "Asaf Savich",
-    "email": "asaf.savich@whitesourcesoftware.com"
-  }],
+  "contributors": [
+    {
+      "name": "Asaf Savich",
+      "email": "asaf.savich@whitesourcesoftware.com"
+    }
+  ],
   "licenses": [
     {
       "type": "Apache-2.0",
