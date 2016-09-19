@@ -70,7 +70,7 @@ var sendBowerDataToServer = function() {
         fs.writeFileSync("./.ws_bower/.ws-sha1-report.json", JSON.stringify(deps, null, 4),{});
 
         var exec = require('child_process').exec;
-        var child = exec('whitesource bower',
+        var child = exec('whitesource bower -c ' + path,
             function(error, stdout, stderr){
                 console.log(  stderr );
                 if (error !== null) {
@@ -115,10 +115,11 @@ var callback = function(code, stdout, stderr) {
     });
 };
 
-var initConf = function(){
+var initConf = function(confPath){
+
     var res = null;
      try{
-        res = fs.readFileSync('./whitesource.config.json', 'utf8',function(err,data){
+        res = fs.readFileSync(confPath, 'utf8',function(err,data){
             if(!err){
                 console.log(fileMsg);
                 return false;
@@ -127,12 +128,19 @@ var initConf = function(){
         res = JSON.parse(res);
     }catch(e){
         console.log(noConfMsg);
+
         return false;
     }
     return res;
 };
 
-var confJson = initConf();
+// Get custom location config file
+var args = process.argv.slice(2);
+var path = './whitesource.config.json';
+if (args.length >= 2 && args[0] === '-c') {
+    path = args[1];
+}
+var confJson = initConf(path);
 var child = null;
 
 if(typeof (confJson.devDep) !== "undefined" && (confJson.devDep == "true" || confJson.devDep) ){
