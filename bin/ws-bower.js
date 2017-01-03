@@ -3,19 +3,15 @@
 'use strict';
 
 var fs = require('fs');
-var http = require('https');
-var util  = require('util');
-var Download = require('download');
-var checksum = require("checksum");
 var shelljs = require("shelljs");
 var spawnSync = require('child_process').spawnSync;
 var child_process = require('child_process');
-
 console.log( "WS Bower : Initializing Agent");
 
 var noConfMsg = 'Please create a whitesource.config.json to continue';
-var fileMsg = 'whitesource.config.json is not a valid JSON file';
 
+var fileMsg = 'whitesource.config.json is not a valid JSON file';
+var finishedId = "install";
 
 var fixJson = function(file){
     //go to deps array avoid console log prints at first line.
@@ -38,12 +34,11 @@ var sendBowerDataToServer = function() {
 
 
     for (var i in bowerJson) {
-        var versionType = bowerJson[i].data.resolution.type;
-        var depName = bowerJson[i].data.resolver.name;
-        var depVersion = bowerJson[i].data.resolution.tag;
+        var versionType = bowerJson[i].data.pkgMeta._resolution.type;
+        var depName = bowerJson[i].data.endpoint.name;
+        var depVersion = bowerJson[i].data.pkgMeta._resolution.tag;
 
         if (versionType === "tag" || versionType === "version") {
-
             var dep = {
                 "name": depName,
                 "artifactId": depName,
@@ -83,16 +78,14 @@ var sendBowerDataToServer = function() {
 var parseBowerJson = function(json){
     var newJson = [];
     for (var i in json){
-        if(json[i].id == "checkout"){
+        if(json[i].id == finishedId){
             newJson.push(json[i])
         }
     }
     return newJson;
 };
 
-
 console.log( "WS Bower : Starting Report...");
-
 
 shelljs.rm('-rf', './.ws_bower');
 shelljs.mkdir('-p' , '.ws_bower');
