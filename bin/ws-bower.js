@@ -72,6 +72,8 @@ var sendBowerDataToServer = function() {
                     console.log("exec error: " + error);
                 }
             });
+    } else {
+        console.log("No dependencies found - Aborting...");
     }
 };
 
