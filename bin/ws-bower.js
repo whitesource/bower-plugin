@@ -25,7 +25,7 @@ var fixJson = function(file){
 };
 
 var sendBowerDataToServer = function() {
-    console.log( "WS Bower : Locating Bower Pacakges Source...");
+    console.log( "WS Bower : Locating Bower Packages Source...");
     var file = fs.readFileSync("./ws_bower.json", 'utf8');
     file = file.replace(/(\r\n|\n|\r)/gm,"");
     var file = fixJson(file);
