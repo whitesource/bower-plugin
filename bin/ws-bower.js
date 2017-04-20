@@ -29,7 +29,11 @@ var sendBowerDataToServer = function() {
     var file = fs.readFileSync("./ws_bower.json", 'utf8');
     file = file.replace(/(\r\n|\n|\r)/gm,"");
     var file = fixJson(file);
-    var bowerJson = parseBowerJson(    JSON.parse(file)    );
+    try {
+        var bowerJson = parseBowerJson(JSON.parse(file));
+    } catch (e) {
+        noDependenciesFound();
+    }
     var deps = [];
 
 
@@ -73,8 +77,13 @@ var sendBowerDataToServer = function() {
                 }
             });
     } else {
-        console.log("No dependencies found - Aborting...");
+        noDependenciesFound();
     }
+};
+
+var noDependenciesFound = function () {
+    console.log("No dependencies found - Aborting...");
+    process.exit(0);
 };
 
 var parseBowerJson = function(json){
@@ -104,7 +113,7 @@ console.log( "WS Bower : Installing and Scanning Dependencies...");
 
 var callback = function(code, stdout, stderr) {
     fs.writeFile('./ws_bower.json', stderr, function (err) {
-      if (err) return console.log(err);
+        if (err) return console.log(err);
         console.log("WS Bower: Getting Packages Data...");
         sendBowerDataToServer();
     });
@@ -112,13 +121,13 @@ var callback = function(code, stdout, stderr) {
 
 var initConf = function(confPath){
     var conf = null;
-     try{
+    try{
         conf = fs.readFileSync(confPath, 'utf8',function(err,data){
             if(!err){
                 console.log(fileMsg);
                 return false;
             }
-        }); 
+        });
         conf = JSON.parse(conf);
     }catch(e){
         console.log(noConfMsg);
