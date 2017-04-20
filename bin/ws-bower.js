@@ -111,22 +111,20 @@ var callback = function(code, stdout, stderr) {
 };
 
 var initConf = function(confPath){
-
-    var res = null;
+    var conf = null;
      try{
-        res = fs.readFileSync(confPath, 'utf8',function(err,data){
+        conf = fs.readFileSync(confPath, 'utf8',function(err,data){
             if(!err){
                 console.log(fileMsg);
                 return false;
             }
         }); 
-        res = JSON.parse(res);
+        conf = JSON.parse(conf);
     }catch(e){
         console.log(noConfMsg);
-
         return false;
     }
-    return res;
+    return conf;
 };
 
 // Get custom location config file
