@@ -12,6 +12,7 @@ var noConfMsg = 'Please create a whitesource.config.json to continue';
 
 var fileMsg = 'whitesource.config.json is not a valid JSON file';
 var finishedId = "install";
+var encoding = 'utf8';
 var EMPTY_JSON = "{}";
 
 var fixJson = function(file){
@@ -122,7 +123,7 @@ var callback = function(code, stdout, stderr) {
 var initConf = function(confPath){
     var conf = null;
     try{
-        conf = fs.readFileSync(confPath, 'utf8',function(err,data){
+        conf = fs.readFileSync(confPath, encoding, function(err, data){
             if(!err){
                 console.log(fileMsg);
                 return false;
