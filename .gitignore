@@ -8,4 +8,9 @@ bin/.ws_bower/
 bin/*.json
 bin/ws-log-bower-deps-report
 bin/ws-log-bower-report
+ws-ls.json
+ws-log-npm-report
+ws-log-report-post.json
+ws-log-report.json
+ws-log-response-npm.json
 bower.json
