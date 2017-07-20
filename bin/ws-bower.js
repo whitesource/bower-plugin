@@ -12,8 +12,12 @@ var noConfMsg = 'Please create a whitesource.config.json to continue';
 
 var fileMsg = 'whitesource.config.json is not a valid JSON file';
 var finishedId = "install";
+var EMPTY_JSON = "{}";
 
 var fixJson = function(file){
+    if (file === EMPTY_JSON) {
+        return EMPTY_JSON;
+    }
     //go to deps array avoid console log prints at first line.
     file = file.substr(file.indexOf('['),file.length);
 
@@ -32,7 +36,7 @@ var sendBowerDataToServer = function() {
     try {
         var bowerJson = parseBowerJson(JSON.parse(file));
     } catch (e) {
-        noDependenciesFound();
+        badBowerJson();
     }
     var deps = [];
 
@@ -64,26 +68,22 @@ var sendBowerDataToServer = function() {
         }
     }
 
-    if (deps.length > 0) {
-        console.log( "WS Bower : Finishing Report");
-        fs.writeFileSync("./.ws_bower/.ws-sha1-report.json", JSON.stringify(deps, null, 4),{});
+    console.log( "WS Bower : Finishing Report");
+    fs.writeFileSync("./.ws_bower/.ws-sha1-report.json", JSON.stringify(deps, null, 4),{});
 
-        var exec = require('child_process').exec;
-        var child = exec('whitesource bower -c ' + path,
-            function(error, stdout, stderr){
-                console.log(  stderr );
-                if (error !== null) {
-                    console.log("exec error: " + error);
-                }
-            });
-    } else {
-        noDependenciesFound();
-    }
+    var exec = require('child_process').exec;
+    var child = exec('whitesource bower -c ' + path,
+        function(error, stdout, stderr){
+            console.log(  stderr );
+            if (error !== null) {
+                console.log("exec error: " + error);
+            }
+        });
 };
 
-var noDependenciesFound = function () {
-    console.log("No dependencies found - Aborting...");
-    process.exit(0);
+var badBowerJson = function () {
+    console.log("Could not parse bower.json - Aborting...");
+    process.exit(1);
 };
 
 var parseBowerJson = function(json){
