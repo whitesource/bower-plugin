@@ -1,6 +1,6 @@
 {
   "name": "ws-bower",
-  "version": "1.1.4",
+  "version": "18.2.1-SNAPSHOT",
   "description": "WhiteSource Bower Plugin",
   "preferGlobal": true,
   "bin": {
@@ -25,6 +25,10 @@
     {
       "name": "Asaf Savich",
       "email": "asaf.savich@whitesourcesoftware.com"
+    },
+    {
+      "name": "Raz Nitzan",
+      "email": "raz.nitzan@whitesourcesoftware.com"
     }
   ],
   "license": "Apache-2.0",

@@ -11,7 +11,6 @@ console.log( "WS Bower : Initializing Agent");
 var noConfMsg = 'Please create a whitesource.config.json to continue';
 
 var fileMsg = 'whitesource.config.json is not a valid JSON file';
-var finishedId = "install";
 var encoding = 'utf8';
 var EMPTY_JSON = "{}";
 
@@ -19,36 +18,63 @@ var fixJson = function(file){
     if (file === EMPTY_JSON) {
         return EMPTY_JSON;
     }
-    //go to deps array avoid console log prints at first line.
-    file = file.substr(file.indexOf('['),file.length);
-
     //fix for json output
-    if(file.indexOf("]{") != -1){
-        file = file.substr(0,file.indexOf("]{") + 1);
+    var index = file.indexOf("]{");
+    if(index != -1){
+        file = file.substr(index + 1,file.length);
     }
     return file;
 };
 
-var sendBowerDataToServer = function() {
-    console.log( "WS Bower : Locating Bower Packages Source...");
-    var file = fs.readFileSync("./ws_bower.json", 'utf8');
-    file = file.replace(/(\r\n|\n|\r)/gm,"");
-    var file = fixJson(file);
-    try {
-        var bowerJson = parseBowerJson(JSON.parse(file));
-    } catch (e) {
-        badBowerJson();
+// this is the function for full tree
+/*
+function collectDependencies(bowerJson) {
+    var dependencies = [];
+    if (bowerJson != null && bowerJson != undefined) {
+        if (bowerJson.hasOwnProperty("dependencies")) {
+            var dependenciesJson = bowerJson.dependencies;
+            var dependencisKeys = Object.keys(dependenciesJson);
+            var key;
+            for (key in dependencisKeys) {
+                var dependecyJson = dependenciesJson[dependencisKeys[key]];
+                var dependency = createDependency(dependecyJson);
+                if (dependency != null) {
+                    dependency.children = collectDependencies(dependecyJson);
+                    dependencies.push(dependency);
+                }
+            }
+        }
     }
-    var deps = [];
+    return dependencies;
+}*/
 
+function collectDependencies(bowerJson, dependencies) {
+    if (bowerJson != null && bowerJson != undefined) {
+        if (bowerJson.hasOwnProperty("dependencies")) {
+            var dependenciesJson = bowerJson.dependencies;
+            var dependencisKeys = Object.keys(dependenciesJson);
+            var key;
+            for (key in dependencisKeys) {
+                var dependecyJson = dependenciesJson[dependencisKeys[key]];
+                var dependency = createDependency(dependecyJson);
+                if (dependency != null) {
+                    dependencies.push(dependency);
+                    collectDependencies(dependecyJson, dependencies);
+                }
+            }
+        }
+    }
+}
 
-    for (var i in bowerJson) {
-        var versionType = bowerJson[i].data.pkgMeta._resolution.type;
-        var depName = bowerJson[i].data.endpoint.name;
-        var depVersion = bowerJson[i].data.pkgMeta._resolution.tag;
+function createDependency(depObject) {
+    var dep = null;
+    if(depObject.hasOwnProperty("pkgMeta")) {
+        var versionType = depObject.pkgMeta._resolution.type;
+        var depName = depObject.endpoint.name;
+        var depVersion = depObject.pkgMeta._resolution.tag;
 
         if (versionType === "tag" || versionType === "version") {
-            var dep = {
+            dep = {
                 "name": depName,
                 "artifactId": depName,
                 "version": depVersion,
@@ -60,17 +86,29 @@ var sendBowerDataToServer = function() {
                 "classifier": null,
                 "sha1": null
             };
-
-            deps.push(dep);
-            console.log("Package: " + depName + "  || Version: " + depVersion);
         } else {
             console.log("*We were not able to allocate the bower version for '" + depName + "' in you bower.json file. \t " +
                 "At the moment we only support tag, so please modify your bower.json accordingly and run the plugin again.")
         }
     }
+    return dep;
+}
+
+var sendBowerDataToServer = function() {
+    console.log( "WS Bower : Locating Bower Packages Source...");
+    var file = fs.readFileSync("./ws_bower.json", 'utf8');
+    file = file.replace(/(\r\n|\n|\r)/gm,"");
+    file = fixJson(file);
+    try {
+        var bowerJson = JSON.parse(file);
+    } catch (e) {
+        badBowerJson();
+    }
+    var dependencies = [];
+    collectDependencies(bowerJson, dependencies);
 
     console.log( "WS Bower : Finishing Report");
-    fs.writeFileSync("./.ws_bower/.ws-sha1-report.json", JSON.stringify(deps, null, 4),{});
+    fs.writeFileSync("./.ws_bower/.ws-sha1-report.json", JSON.stringify(dependencies, null, 4),{});
 
     var exec = require('child_process').exec;
     var child = exec('whitesource bower -c ' + path,
@@ -85,16 +123,6 @@ var sendBowerDataToServer = function() {
 var badBowerJson = function () {
     console.log("Could not parse bower.json - Aborting...");
     process.exit(1);
-};
-
-var parseBowerJson = function(json){
-    var newJson = [];
-    for (var i in json){
-        if(json[i].id == finishedId){
-            newJson.push(json[i])
-        }
-    }
-    return newJson;
 };
 
 console.log( "WS Bower : Starting Report...");
@@ -144,12 +172,23 @@ if (args.length >= 2 && args[0] === '-c') {
     path = args[1];
 }
 var confJson = initConf(path);
-var child = null;
+var child;
+var bowerInstallWithDevDependencies = "bower install --force --silent";
+var bowerInstall = "bower install --force --production --silent";
 
 if(typeof (confJson.devDep) !== "undefined" && (confJson.devDep == "true" || confJson.devDep) ){
-    child = shelljs.exec("bower install --json --force --production");
-}else{
-    child = shelljs.exec("bower install --json --force");
+    execBowerInstall(bowerInstallWithDevDependencies);
+} else {
+    execBowerInstall(bowerInstall);
 }
+child = shelljs.exec("bower list --json");
+callback(0, null, child.output);
 
-callback(0,null,child.output);
+function execBowerInstall(command) {
+    try {
+        child_process.execSync(command);
+    } catch(e) {
+        console.log("WS Bower : Failed to execute 'bower install'. Please fix the issue and scan again.");
+        process.exit(1);
+    }
+}
