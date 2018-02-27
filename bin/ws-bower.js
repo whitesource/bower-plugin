@@ -113,7 +113,7 @@ var sendBowerDataToServer = function() {
     var exec = require('child_process').exec;
     var child = exec('whitesource bower -c ' + path,
         function(error, stdout, stderr){
-            console.log(  stderr );
+            console.log(stderr);
             if (error !== null) {
                 console.log("exec error: " + error);
             }
