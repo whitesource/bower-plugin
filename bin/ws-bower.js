@@ -22,6 +22,7 @@ var fixJson = function(file){
     var index = file.indexOf("]{");
     if(index != -1){
         file = file.substr(index + 1,file.length);
+
     }
     return file;
 };
