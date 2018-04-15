@@ -6,6 +6,7 @@ var fs = require('fs');
 var shelljs = require("shelljs");
 var spawnSync = require('child_process').spawnSync;
 var child_process = require('child_process');
+var rimraf = require('rimraf');
 console.log( "WS Bower : Initializing Agent");
 
 var noConfMsg = 'Please create a whitesource.config.json to continue';
@@ -176,6 +177,14 @@ var confJson = initConf(path);
 var child;
 var bowerInstallWithDevDependencies = "bower install --force --silent";
 var bowerInstall = "bower install --force --production --silent";
+
+var pathOfBowerComponents = './bower_components';
+if (fs.existsSync(pathOfBowerComponents)) {
+    try {
+        rimraf.sync(pathOfBowerComponents);
+    } catch (e) {
+    }
+}
 
 if(typeof (confJson.devDep) !== "undefined" && (confJson.devDep == "true" || confJson.devDep) ){
     execBowerInstall(bowerInstallWithDevDependencies);
